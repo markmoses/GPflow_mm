@@ -120,7 +120,7 @@ class SGPR(GPModel, SGPRUpperMixin):
         self.feature = features.inducingpoint_wrapper(feat, Z)
         self.num_data = X.shape[0]
 		
-		if weight is None:
+	if weight is None:
             self.weight = np.repeat(1., Y.shape[0])[:,None]
         else:
             self.weight= weight
