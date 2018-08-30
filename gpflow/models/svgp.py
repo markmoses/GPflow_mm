@@ -84,9 +84,9 @@ class SVGP(GPModel):
         self.num_data = num_data or X.shape[0]
         self.q_diag, self.whiten = q_diag, whiten
         self.feature = features.inducingpoint_wrapper(feat, Z)
-		
-		# my addition here
-	if weight is None:
+	
+	
+        if weight is None:
             self.weight = np.repeat(1., Y.shape[0])[:,None]
         else:
             self.weight= weight
@@ -94,7 +94,6 @@ class SVGP(GPModel):
             self.obs_var = np.repeat(0., Y.shape[0])[:,None]
         else:
             self.obs_var = obs_var
-		
 
         # init variational parameters
         num_inducing = len(self.feature)
