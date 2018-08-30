@@ -86,7 +86,7 @@ class SVGP(GPModel):
         self.feature = features.inducingpoint_wrapper(feat, Z)
 		
 		# my addition here
-		if weight is None:
+	if weight is None:
             self.weight = np.repeat(1., Y.shape[0])[:,None]
         else:
             self.weight= weight
