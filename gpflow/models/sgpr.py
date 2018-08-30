@@ -104,7 +104,7 @@ class SGPR(GPModel, SGPRUpperMixin):
 
     """
 
-    def __init__(self, X, Y, kern, feat=None, mean_function=None, Z=None, **kwargs):
+    def __init__(self, X, Y, kern, feat=None, mean_function=None, Z=None, weight=None, obs_var=None, **kwargs):
         """
         X is a data matrix, size N x D
         Y is a data matrix, size N x R
@@ -119,6 +119,15 @@ class SGPR(GPModel, SGPRUpperMixin):
         GPModel.__init__(self, X, Y, kern, likelihood, mean_function, **kwargs)
         self.feature = features.inducingpoint_wrapper(feat, Z)
         self.num_data = X.shape[0]
+		
+		if weight is None:
+            self.weight = np.repeat(1., Y.shape[0])[:,None]
+        else:
+            self.weight= weight
+        if obs_var is None:
+            self.obs_var = np.repeat(0., Y.shape[0])[:,None]
+        else:
+            self.obs_var = obs_var
 
     @params_as_tensors
     def _build_likelihood(self):
@@ -144,13 +153,13 @@ class SGPR(GPModel, SGPRUpperMixin):
         AAT = tf.matmul(A, A, transpose_b=True)
         B = AAT + tf.eye(num_inducing, dtype=settings.float_type)
         LB = tf.cholesky(B)
-        Aerr = tf.matmul(A, err)
+        Aerr = tf.matmul(A, err*self.weight)
         c = tf.matrix_triangular_solve(LB, Aerr, lower=True) / sigma
 
         # compute log marginal bound
         bound = -0.5 * num_data * output_dim * np.log(2 * np.pi)
         bound += tf.negative(output_dim) * tf.reduce_sum(tf.log(tf.matrix_diag_part(LB)))
-        bound -= 0.5 * num_data * output_dim * tf.log(self.likelihood.variance)
+        bound -= 0.5 * num_data * output_dim * tf.log(self.likelihood.variance+self.obs_var)
         bound += -0.5 * tf.reduce_sum(tf.square(err)) / self.likelihood.variance
         bound += 0.5 * tf.reduce_sum(tf.square(c))
         bound += -0.5 * output_dim * tf.reduce_sum(Kdiag) / self.likelihood.variance

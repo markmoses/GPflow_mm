@@ -53,6 +53,8 @@ class SVGP(GPModel):
                  num_data=None,
                  q_mu=None,
                  q_sqrt=None,
+				 weight = None,
+				 obs_var= None,
                  **kwargs):
         """
         - X is a data matrix, size N x D
@@ -82,6 +84,17 @@ class SVGP(GPModel):
         self.num_data = num_data or X.shape[0]
         self.q_diag, self.whiten = q_diag, whiten
         self.feature = features.inducingpoint_wrapper(feat, Z)
+		
+		# my addition here
+		if weight is None:
+            self.weight = np.repeat(1., Y.shape[0])[:,None]
+        else:
+            self.weight= weight
+        if obs_var is None:
+            self.obs_var = np.repeat(0., Y.shape[0])[:,None]
+        else:
+            self.obs_var = obs_var
+		
 
         # init variational parameters
         num_inducing = len(self.feature)
@@ -158,12 +171,12 @@ class SVGP(GPModel):
         fmean, fvar = self._build_predict(self.X, full_cov=False, full_output_cov=False)
 
         # Get variational expectations.
-        var_exp = self.likelihood.variational_expectations(fmean, fvar, self.Y)
+        var_exp = self.likelihood.variational_expectations(fmean, fvar+self.obs_var, self.Y)
 
         # re-scale for minibatch size
         scale = tf.cast(self.num_data, settings.float_type) / tf.cast(tf.shape(self.X)[0], settings.float_type)
 
-        return tf.reduce_sum(var_exp) * scale - KL
+        return tf.reduce_sum(var_exp*self.weight) * scale - KL
 
     @params_as_tensors
     def _build_predict(self, Xnew, full_cov=False, full_output_cov=False):
