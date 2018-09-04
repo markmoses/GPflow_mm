@@ -60,6 +60,7 @@ class SGPMC(GPModel):
                  mean_function=None,
                  num_latent=None,
                  Z=None,
+                 obs_var=None,
                  **kwargs):
         """
         X is a data matrix, size N x D
@@ -75,6 +76,10 @@ class SGPMC(GPModel):
         self.feature = inducingpoint_wrapper(feat, Z)
         self.V = Parameter(np.zeros((len(self.feature), self.num_latent)))
         self.V.prior = Gaussian(0., 1.)
+        if obs_var is None:
+            self.obs_var = np.repeat(0., Y.shape[0])[:,None]
+        else:
+            self.obs_var = obs_var
 
     @params_as_tensors
     def _build_likelihood(self):
@@ -83,7 +88,7 @@ class SGPMC(GPModel):
         """
         # get the (marginals of) q(f): exactly predicting!
         fmean, fvar = self._build_predict(self.X, full_cov=False)
-        return tf.reduce_sum(self.likelihood.variational_expectations(fmean, fvar, self.Y))
+        return tf.reduce_sum(self.likelihood.variational_expectations(fmean, fvar+self.obs_var, self.Y))
 
     @params_as_tensors
     def _build_predict(self, Xnew, full_cov=False, full_output_cov=False):
