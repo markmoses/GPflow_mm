@@ -179,7 +179,7 @@ class sfa_gaussian(Likelihood):
     @params_as_tensors
     def logp(self, F, Y):
         epsilon  = F-Y
-        mu_i = (epsilon*self.varaince_2 +self.mu*self.variance)/(self.variance_2+self.variance)
+        mu_i = (epsilon*self.variance_2 +self.mu*self.variance)/(self.variance_2+self.variance)
         sigma_i = tf.sqrt(self.variance_2) *tf.sqrt(self.variance)/tf.sqrt(self.variance_2+self.variance)
         dist = tf.distributions.Normal(0., 1.)
         eff = (1- dist.cdf(-sigma_i - mu_i/sigma_i))/(1-dist.cdf(-mu_i/sigma_i))*tf.exp(-mu_u+.5+tf.square(sigma_i))
