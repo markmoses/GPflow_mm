@@ -145,7 +145,7 @@ class Gaussian(Likelihood):
                - 0.5 * (tf.square(Y - Fmu) + Fvar) / self.variance
 
     
-class sfa_gaussian(gp.likelihoods.Likelihood):
+class sfa_gaussian(Likelihood):
     
      def __init__(self, variance=1.0, variance_2=1.0, mu=.01, **kwargs):
         super().__init__(**kwargs)
