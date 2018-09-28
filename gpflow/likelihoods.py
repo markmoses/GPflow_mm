@@ -147,7 +147,7 @@ class Gaussian(Likelihood):
     
 class sfa_gaussian(Likelihood):
     
-     def __init__(self, variance=1.0, variance_2=1.0, mu=.01, **kwargs):
+    def __init__(self, variance=1.0, variance_2=1.0, mu=.01, **kwargs):
         super().__init__(**kwargs)
         self.variance = Parameter(
             variance, transform=transforms.positive, dtype=settings.float_type)
