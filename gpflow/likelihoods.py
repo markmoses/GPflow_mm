@@ -176,8 +176,6 @@ class sfa_gaussian(Likelihood):
     def variational_expectations(self, Fmu, Fvar, Y):
         return -0.5 * np.log(2 * np.pi) - 0.5 * tf.log(self.variance) \
                - 0.5 * (tf.square(Y - Fmu) + Fvar) / self.variance
-    
-   
     @params_as_tensors
     def logp(self, F, Y):
         epsilon  = F-Y
