@@ -164,7 +164,7 @@ class sfa_gaussian(Likelihood):
     def conditional_variance(self, F):
         return tf.fill(tf.shape(F), tf.squeeze(self.variance))
 
-    @gparams_as_tensors
+    @params_as_tensors
     def predict_mean_and_var(self, Fmu, Fvar):
         return tf.identity(Fmu), Fvar + self.variance
 
