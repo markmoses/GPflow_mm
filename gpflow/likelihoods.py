@@ -144,7 +144,70 @@ class Gaussian(Likelihood):
         return -0.5 * np.log(2 * np.pi) - 0.5 * tf.log(self.variance) \
                - 0.5 * (tf.square(Y - Fmu) + Fvar) / self.variance
 
-    
+ 
+class Gaussian_1(Likelihood):
+    def __init__(self, variance=1.0, trans=transforms.positive, **kwargs):
+        super().__init__(trans, **kwargs)
+        self.variance = Parameter(
+            variance, transform=trans, dtype=settings.float_type)
+
+    @params_as_tensors
+    def logp(self, F, Y):
+        return logdensities.gaussian(Y, F, self.variance)
+
+    @params_as_tensors
+    def conditional_mean(self, F):  # pylint: disable=R0201
+        return tf.identity(F)
+
+    @params_as_tensors
+    def conditional_variance(self, F):
+        return tf.fill(tf.shape(F), tf.squeeze(self.variance))
+
+    @params_as_tensors
+    def predict_mean_and_var(self, Fmu, Fvar):
+        return tf.identity(Fmu), Fvar + self.variance
+
+    @params_as_tensors
+    def predict_density(self, Fmu, Fvar, Y):
+        return logdensities.gaussian(Y, Fmu, Fvar + self.variance)
+
+    @params_as_tensors
+    def variational_expectations(self, Fmu, Fvar, Y):
+        return -0.5 * np.log(2 * np.pi) - 0.5 * tf.log(self.variance) \
+               - 0.5 * (tf.square(Y - Fmu) + Fvar) / self.variance
+class Gaussian_2(Likelihood):
+    def __init__(self, variance=1.0, trans=transforms.positive, **kwargs):
+        self.variance = Parameter(
+            variance, transform=trans, dtype=settings.float_type)
+
+        super().__init__( **kwargs)
+        
+    @params_as_tensors
+    def logp(self, F, Y):
+        return logdensities.gaussian(Y, F, self.variance)
+
+    @params_as_tensors
+    def conditional_mean(self, F):  # pylint: disable=R0201
+        return tf.identity(F)
+
+    @params_as_tensors
+    def conditional_variance(self, F):
+        return tf.fill(tf.shape(F), tf.squeeze(self.variance))
+
+    @params_as_tensors
+    def predict_mean_and_var(self, Fmu, Fvar):
+        return tf.identity(Fmu), Fvar + self.variance
+
+    @params_as_tensors
+    def predict_density(self, Fmu, Fvar, Y):
+        return logdensities.gaussian(Y, Fmu, Fvar + self.variance)
+
+    @params_as_tensors
+    def variational_expectations(self, Fmu, Fvar, Y):
+        return -0.5 * np.log(2 * np.pi) - 0.5 * tf.log(self.variance) \
+               - 0.5 * (tf.square(Y - Fmu) + Fvar) / self.variance
+
+
 class sfa_gaussian(Likelihood):
     
     def __init__(self, variance=1.0, variance_2=1.0, mu=.01, **kwargs):
